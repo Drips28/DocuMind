@@ -1,0 +1,23 @@
+# Credenciales
+.env
+*.env
+
+# Base de datos vectorial
+chroma_db/
+./chroma_db/
+**/chroma_db/
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# Cache
+    __pycache__/
+*.py[cod]
+
+# Documentos temporales
+data/documentos/*
+!data/documentos/.gitkeep
+.DS_Store
+Thumbs.db
