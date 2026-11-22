@@ -36,7 +36,7 @@ with st.sidebar:
 
     archivos_subidos = st.file_uploader(
         "Arrastra tus archivos aquí",
-        type=["pdf", "docx", "xlsx", "csv"],
+        type=["pdf", "docx", "xlsx", "csv", "png", "jpg", "jpeg"],
         accept_multiple_files=True,
         key=f"uploader_{st.session_state.uploader_key}"
     )
