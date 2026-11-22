@@ -1,23 +1,16 @@
 # Credenciales
 .env
-*.env
 
-# Base de datos vectorial
-chroma_db/
-./chroma_db/
-**/chroma_db/
-
-# Entornos virtuales
+# Entorno virtual y caché de Python
 venv/
-.venv/
-env/
-
-# Cache
-    __pycache__/
+__pycache__/
 *.py[cod]
 
-# Documentos temporales
-data/documentos/*
-!data/documentos/.gitkeep
+# Base vectorial local y archivos privados de usuario
+chroma_db/
+documentos/
+*.xlsx
+
+# Basura del sistema (Mac y Windows)
 .DS_Store
 Thumbs.db
