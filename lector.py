@@ -12,16 +12,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class LectorDocumentos:
     """
-    Clase encargada de procesar diferentes formatos de archivos (incluyendo imágenes 
+    Clase encargada de procesar diferentes formatos de archivos (incluyendo imágenes
     y PDFs escaneados mediante visión multimodal) y unificar su contenido en objetos 'Document' de LangChain.
     """
-    
+
     def __init__(self, ruta_archivo: str):
         self.ruta_archivo = ruta_archivo
         self.extension = os.path.splitext(ruta_archivo)[1].lower()
-        # Inicializamos el LLM multimodal con timeout explícito
         self.llm_vision = ChatGoogleGenerativeAI(
             model="gemini-3.8-flash",
             temperature=0,
@@ -49,7 +49,6 @@ class LectorDocumentos:
 
         documentos_crudos = []
 
-        # 1. Extraer el contenido según el formato
         if self.extension == ".pdf":
             documentos_crudos = self._leer_pdf_inteligente()
         elif self.extension == ".docx":
@@ -65,276 +64,20 @@ class LectorDocumentos:
         if not documentos_crudos:
             return []
 
-        # 2. Si es texto plano o extraído, lo dividimos en fragmentos óptimos (Chunking)
         print("✂️ Dividiendo el texto en fragmentos óptimos para la IA...")
         cortador = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=150,
             length_function=len
         )
-        
-        fragmentos_finales = cortador.split_documents(documentos_crudos)
-       git checkout -b fix/soporte-imagenes-y-cierre-pdf
 
-cat << 'EOF' > lector.py
-import os
-import base64
-import pandas as pd
-import fitz  # PyMuPDF para renderizar PDFs a imágenes y leer PDFs escaneados
-from docx import Document as DocxReader
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_core.documents import Document
-from langchain_core.messages import HumanMessage
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import ChatGoogleGenerativeAI
-from dotenv import load_dotenv
-
-load_dotenv()
-
-class LectorDocumentos:
-    """
-    Clase encargada de procesar diferentes formatos de archivos (incluyendo imágenes 
-    y PDFs escaneados mediante visión multimodal) y unificar su contenido en objetos 'Document' de LangChain.
-    """
-    
-    def __init__(self, ruta_archivo: str):
-        self.ruta_archivo = ruta_archivo
-        self.extension = os.path.splitext(ruta_archivo)[1].lower()
-        # Inicializamos el LLM multimodal con timeout explícito
-        self.llm_vision = ChatGoogleGenerativeAI(
-            model="gemini-3.8-flash",
-            temperature=0,
-            timeout=60,
-            max_retries=1
-        )
-
-    @staticmethod
-    def _normalizar_contenido(contenido) -> str:
-        """Extrae texto limpio si el modelo devuelve una lista de bloques estructurados."""
-        if isinstance(contenido, list):
-            textos = [
-                bloque.get("text", "")
-                for bloque in contenido
-                if isinstance(bloque, dict) and bloque.get("type") == "text"
-            ]
-            return "\n".join(textos).strip()
-        return str(contenido).strip()
-
-    def procesar(self) -> list[Document]:
-        """Detecta la extensión, ejecuta el lector adecuado y divide el texto si es necesario."""
-        if not os.path.exists(self.ruta_archivo):
-            print(f"❌ Error: El archivo no existe en la ruta: {self.ruta_archivo}")
-            return []
-
-        documentos_crudos = []
-
-        # 1. Extraer el contenido según el formato
-        if self.extension == ".pdf":
-            documentos_crudos = self._leer_pdf_inteligente()
-        elif self.extension == ".docx":
-            documentos_crudos = self._leer_docx()
-        elif self.extension in [".xlsx", ".csv"]:
-            return self._leer_tabla()
-        elif self.extension in [".png", ".jpg", ".jpeg"]:
-            documentos_crudos = self._leer_imagen()
-        else:
-            print(f"⚠️ Formato {self.extension} no soportado todavía.")
-            return []
-
-        if not documentos_crudos:
-            return []
-
-        # 2. Si es texto plano o extraído, lo dividimos en fragmentos óptimos (Chunking)
-        print("✂️ Dividiendo el texto en fragmentos óptimos para la IA...")
-        cortador = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=150,
-            length_function=len
-        )
-        
         fragmentos_finales = cortador.split_documents(documentos_crudos)
         return fragmentos_finales
 
     def _leer_pdf_inteligente(self) -> list[Document]:
         """Intenta leer texto normal. Si una página está vacía (escaneada), usa Visión Multimodal."""
         print(f"📖 Leyendo PDF (Modo Inteligente): {os.path.basename(self.ruta_archivo)}...")
-        
-        documentos = []
-        try:
-            cargador = Py
-git checkout -b fix/soporte-imagenes-y-cierre-pdf
 
-cat << 'EOF' > lector.py
-import os
-import base64
-import pandas as pd
-import fitz  # PyMuPDF para renderizar PDFs a imágenes y leer PDFs escaneados
-from docx import Document as DocxReader
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_core.documents import Document
-from langchain_core.messages import HumanMessage
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import ChatGoogleGenerativeAI
-from dotenv import load_dotenv
-
-load_dotenv()
-
-class LectorDocumentos:
-    """
-    Clase encargada de procesar diferentes formatos de archivos (incluyendo imágenes 
-    y PDFs escaneados mediante visión multimodal) y unificar su contenido en objetos 'Document' de LangChain.
-    """
-    
-    def __init__(self, ruta_archivo: str):
-        self.ruta_archivo = ruta_archivo
-        self.extension = os.path.splitext(ruta_archivo)[1].lower()
-        # Inicializamos el LLM multimodal con timeout explícito
-        self.llm_vision = ChatGoogleGenerativeAI(
-            model="gemini-3.8-flash",
-            temperature=0,
-            timeout=60,
-            max_retries=1
-        )
-
-    @staticmethod
-    def _normalizar_contenido(contenido) -> str:
-        """Extrae texto limpio si el modelo devuelve una lista de bloques estructurados."""
-        if isinstance(contenido, list):
-            textos = [
-                bloque.get("text", "")
-                for bloque in contenido
-                if isinstance(bloque, dict) and bloque.get("type") == "text"
-            ]
-            return "\n".join(textos).strip()
-        return str(contenido).strip()
-
-    def procesar(self) -> list[Document]:
-        """Detecta la extensión, ejecuta el lector adecuado y divide el texto si es necesario."""
-        if not os.path.exists(self.ruta_archivo):
-            print(f"❌ Error: El archivo no existe en la ruta: {self.ruta_archivo}")
-            return []
-
-        documentos_crudos = []
-
-        # 1. Extraer el contenido según el formato
-        if self.extension == ".pdf":
-            documentos_crudos = self._leer_pdf_inteligente()
-        elif self.extension == ".docx":
-            documentos_crudos = self._leer_docx()
-        elif self.extension in [".xlsx", ".csv"]:
-            return self._leer_tabla()
-        elif self.extension in [".png", ".jpg", ".jpeg"]:
-            documentos_crudos = self._leer_imagen()
-        else:
-            print(f"⚠️ Formato {self.extension} no soportado todavía.")
-            return []
-
-        if not documentos_crudos:
-            return []
-
-        # 2. Si es texto plano o extraído, lo dividimos en fragmentos óptimos (Chunking)
-        print("✂️ Dividiendo el texto en fragmentos óptimos para la IA...")
-        cortador = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=150,
-            length_function=len
-        )
-        
-        fragmentos_finales = cortador.split_documents(documentos_crudos)
-        return fragmentos_finales
-
-    def _leer_pdf_inteligente(self) -> list[Document]:
-        """Intenta leer texto normal. Si una página está vacía (escaneada), usa Visión Multimodal."""
-        print(f"📖 Leyendo PDF (Modo Inteligente): {os.path.basename(self.ruta_archivo)}...")
-        
-        documentos = []
-        try:
-            cargador = Py
-git checkout -b fix/soporte-imagenes-y-cierre-pdf
-
-cat << 'EOF' > lector.py
-import os
-import base64
-import pandas as pd
-import fitz  # PyMuPDF para renderizar PDFs a imágenes y leer PDFs escaneados
-from docx import Document as DocxReader
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_core.documents import Document
-from langchain_core.messages import HumanMessage
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import ChatGoogleGenerativeAI
-from dotenv import load_dotenv
-
-load_dotenv()
-
-class LectorDocumentos:
-    """
-    Clase encargada de procesar diferentes formatos de archivos (incluyendo imágenes 
-    y PDFs escaneados mediante visión multimodal) y unificar su contenido en objetos 'Document' de LangChain.
-    """
-    
-    def __init__(self, ruta_archivo: str):
-        self.ruta_archivo = ruta_archivo
-        self.extension = os.path.splitext(ruta_archivo)[1].lower()
-        # Inicializamos el LLM multimodal con timeout explícito
-        self.llm_vision = ChatGoogleGenerativeAI(
-            model="gemini-3.8-flash",
-            temperature=0,
-            timeout=60,
-            max_retries=1
-        )
-
-    @staticmethod
-    def _normalizar_contenido(contenido) -> str:
-        """Extrae texto limpio si el modelo devuelve una lista de bloques estructurados."""
-        if isinstance(contenido, list):
-            textos = [
-                bloque.get("text", "")
-                for bloque in contenido
-                if isinstance(bloque, dict) and bloque.get("type") == "text"
-            ]
-            return "\n".join(textos).strip()
-        return str(contenido).strip()
-
-    def procesar(self) -> list[Document]:
-        """Detecta la extensión, ejecuta el lector adecuado y divide el texto si es necesario."""
-        if not os.path.exists(self.ruta_archivo):
-            print(f"❌ Error: El archivo no existe en la ruta: {self.ruta_archivo}")
-            return []
-
-        documentos_crudos = []
-
-        # 1. Extraer el contenido según el formato
-        if self.extension == ".pdf":
-            documentos_crudos = self._leer_pdf_inteligente()
-        elif self.extension == ".docx":
-            documentos_crudos = self._leer_docx()
-        elif self.extension in [".xlsx", ".csv"]:
-            return self._leer_tabla()
-        elif self.extension in [".png", ".jpg", ".jpeg"]:
-            documentos_crudos = self._leer_imagen()
-        else:
-            print(f"⚠️ Formato {self.extension} no soportado todavía.")
-            return []
-
-        if not documentos_crudos:
-            return []
-
-        # 2. Si es texto plano o extraído, lo dividimos en fragmentos óptimos (Chunking)
-        print("✂️ Dividiendo el texto en fragmentos óptimos para la IA...")
-        cortador = RecursiveCharacterTextSplitter(
-            chunk_size=1000,
-            chunk_overlap=150,
-            length_function=len
-        )
-        
-        fragmentos_finales = cortador.split_documents(documentos_crudos)
-        return fragmentos_finales
-
-    def _leer_pdf_inteligente(self) -> list[Document]:
-        """Intenta leer texto normal. Si una página está vacía (escaneada), usa Visión Multimodal."""
-        print(f"📖 Leyendo PDF (Modo Inteligente): {os.path.basename(self.ruta_archivo)}...")
-        
         documentos = []
         try:
             cargador = PyPDFLoader(self.ruta_archivo)
@@ -342,21 +85,20 @@ class LectorDocumentos:
         except Exception:
             docs_normales = []
 
-        # Uso de context manager para asegurar el cierre del archivo en Windows/macOS
         with fitz.open(self.ruta_archivo) as doc_fitz:
             for index, pagina_fitz in enumerate(doc_fitz):
                 num_pag = index + 1
                 texto_extraido = docs_normales[index].page_content if index < len(docs_normales) else ""
-                
+
                 if len(texto_extraido.strip()) > 50:
                     meta = {"source": self.ruta_archivo, "type": "pdf", "page": num_pag}
                     documentos.append(Document(page_content=texto_extraido, metadata=meta))
                 else:
                     print(f"👁️ Página {num_pag} es una imagen/escaneada. Aplicando Visión Multimodal...")
-                    
+
                     pix = pagina_fitz.get_pixmap(dpi=150)
                     bytes_imagen = pix.tobytes("png")
-                    
+
                     mensaje = HumanMessage(
                         content=[
                             {
@@ -369,7 +111,7 @@ class LectorDocumentos:
                             }
                         ]
                     )
-                    
+
                     try:
                         respuesta = self.llm_vision.invoke([mensaje])
                         texto_multimodal = self._normalizar_contenido(respuesta.content)
@@ -384,11 +126,11 @@ class LectorDocumentos:
     def _leer_imagen(self) -> list[Document]:
         """Procesa archivos de imagen directamente (.png, .jpg, .jpeg) usando Visión Multimodal."""
         print(f"👁️ Analizando Imagen con Visión Multimodal: {os.path.basename(self.ruta_archivo)}...")
-        
+
         mime_type = "image/jpeg" if self.extension in [".jpg", ".jpeg"] else "image/png"
         with open(self.ruta_archivo, "rb") as f:
             bytes_imagen = f.read()
-            
+
         mensaje = HumanMessage(
             content=[
                 {
@@ -401,7 +143,7 @@ class LectorDocumentos:
                 }
             ]
         )
-        
+
         try:
             respuesta = self.llm_vision.invoke([mensaje])
             contenido = self._normalizar_contenido(respuesta.content)
@@ -426,11 +168,11 @@ class LectorDocumentos:
             df = pd.read_csv(self.ruta_archivo)
         else:
             df = pd.read_excel(self.ruta_archivo)
-            
+
         documentos = []
         for indice, fila in df.iterrows():
             contenido_fila = " | ".join([f"{col}: {val}" for col, val in fila.items() if pd.notna(val)])
             meta = {"source": self.ruta_archivo, "type": self.extension, "row": indice}
             documentos.append(Document(page_content=contenido_fila, metadata=meta))
-            
+
         return documentos
