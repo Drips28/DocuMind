@@ -62,14 +62,29 @@ with st.sidebar:
 
     st.divider()
     
-    # Listado visual de los archivos almacenados localmente
+    # Listado visual de los archivos almacenados localmente con eliminación sincronizada (CRUD - Delete)
     st.subheader("📚 Biblioteca Local")
     carpeta_docs = "./documentos"
     if os.path.exists(carpeta_docs):
-        archivos_locales = [f for f in os.listdir(carpeta_docs) if os.path.isfile(os.path.join(carpeta_docs, f))]
+        archivos_locales = sorted(
+            f for f in os.listdir(carpeta_docs)
+            if os.path.isfile(os.path.join(carpeta_docs, f)) and not f.startswith(".")
+        )
         if archivos_locales:
             for arch in archivos_locales:
-                st.text(f"• {arch}")
+                col_nombre, col_borrar = st.columns([4, 1])
+                with col_nombre:
+                    st.text(f"• {arch}")
+                with col_borrar:
+                    if st.button("🗑️", key=f"del_{arch}", help=f"Eliminar {arch}"):
+                        ruta_eliminar = os.path.join(carpeta_docs, arch)
+                        with st.spinner(f"Eliminando {arch}..."):
+                            if os.path.exists(ruta_eliminar):
+                                os.remove(ruta_eliminar)
+                            st.session_state.gestor.eliminar_archivo_de_db(ruta_eliminar)
+                            st.session_state.asistente = AsistenteRAG()
+                        st.toast(f"Archivo '{arch}' eliminado del disco y de ChromaDB.")
+                        st.rerun()
         else:
             st.caption("No hay archivos en ./documentos")
     else:
